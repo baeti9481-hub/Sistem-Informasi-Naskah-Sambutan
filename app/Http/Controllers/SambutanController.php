@@ -26,23 +26,10 @@ class SambutanController extends Controller
             });
         }
 
-        // PENGECEKAN ROLE:
-        // Role 0 = Admin, Role 2 = Ajudan (Dibatasi 10 data terbaru berdasarkan tanggal acara)
-        // Role 1 = Super Admin (Melihat seluruh data)
-        $userRole = auth()->user()->role;
-
-        if (in_array($userRole, [0, 2])) {
-            // Admin (0) & Ajudan (2): Ambil 10 data dengan tanggal & waktu terbaru
-            $agenda = $query->orderBy('tanggal', 'desc')
-                            ->orderBy('waktu', 'desc')
-                            ->take(10)
-                            ->get();
-        } else {
-            // Super Admin (1) dan role lainnya: Ambil semua data diurutkan dari tanggal & waktu terbaru
-            $agenda = $query->orderBy('tanggal', 'desc')
-                            ->orderBy('waktu', 'desc')
-                            ->get();
-        }
+        // Semua role dapat melihat seluruh data secara keseluruhan
+        $agenda = $query->orderBy('tanggal', 'desc')
+                        ->orderBy('waktu', 'desc')
+                        ->get();
 
         return view('backend.v_sambutan.index', compact('agenda'));
     }
@@ -64,7 +51,7 @@ class SambutanController extends Controller
             'tempat'        => 'required|string|max:255',
             'penyusun'      => 'required|string',
             'link'          => 'nullable|url',
-            'kategori'      => 'required|in:Sambutan,Keprotokolan,Sambutan dan Keprotokolan',
+            'kategori'      => 'required|in:Sambutan,Keprotokolan,Sambutan & Keprotokolan',
             'status'        => 'required|in:Publik,Privat',
             'file_surat'    => 'nullable|file|mimes:jpeg,png,jpg,pdf,doc,docx|max:10240',
         ]);
@@ -77,7 +64,7 @@ class SambutanController extends Controller
             $file->storeAs('agenda', $fileName, 'public');
         }
 
-        // 3. Simpan SEMUA opsi kategori ke dalam 1 TABEL (tabel sambutan)
+        // 3. Simpan ke database
         Sambutan::create([
             'acara'         => $request->acara,
             'penyelenggara' => $request->penyelenggara,
@@ -86,7 +73,7 @@ class SambutanController extends Controller
             'tempat'        => $request->tempat,
             'penyusun'      => $request->penyusun,
             'link'          => $request->link,
-            'jenis_surat'   => $request->kategori, // Menyimpan opsi 'Keprotokolan' atau 'Sambutan'
+            'jenis_surat'   => $request->kategori,
             'status'        => $request->status,
             'gambar'        => $fileName,
         ]);
@@ -150,6 +137,7 @@ class SambutanController extends Controller
         return redirect()->route('backend.sambutan.index')->with('sukses', 'Data berhasil dihapus!');
     }
 
+
     // --- METHOD FRONTEND (PUBLIK) ---
 
     // Halaman Frontend Sambutan
@@ -157,42 +145,108 @@ class SambutanController extends Controller
     {
         $now = Carbon::now()->format('Y-m-d H:i:s');
 
+        // Menampilkan jenis Sambutan DAN Sambutan & Keprotokolan
         $query = Sambutan::where('status', 'Publik')
-                         ->whereIn('jenis_surat', ['Sambutan', 'Sambutan dan Keprotokolan'])
-                         // Hanya tampil jika waktu acara (Tanggal + Waktu) <= Waktu sekarang
+                         ->whereIn('jenis_surat', ['Sambutan', 'Sambutan & Keprotokolan'])
                          ->whereRaw("CONCAT(tanggal, ' ', waktu) <= ?", [$now]);
 
+        // FITUR PENCARIAN (Acara, Penyelenggara, Tempat, Tanggal)
         if ($request->filled('search')) {
-            $search = $request->search;
-            $query->where('acara', 'like', '%' . $search . '%');
+            $search = trim($request->search);
+            $query->where(function($q) use ($search) {
+                $q->where('acara', 'like', '%' . $search . '%')
+                  ->orWhere('penyelenggara', 'like', '%' . $search . '%')
+                  ->orWhere('tempat', 'like', '%' . $search . '%')
+                  ->orWhere('tanggal', 'like', '%' . $search . '%')
+                  ->orWhereRaw("DATE_FORMAT(tanggal, '%d-%m-%Y') LIKE ?", ['%' . $search . '%']);
+            });
         }
 
+        // Ambil jumlah entries dari request (default 10) dan gunakan paginate
+        $perPage = $request->input('per_page', 10);
         $suratSambutan = $query->orderBy('tanggal', 'desc')
                                ->orderBy('waktu', 'desc')
-                               ->get();
+                               ->paginate($perPage)
+                               ->withQueryString();
 
         return view('frontend.v_sambutan.index', compact('suratSambutan'));
     }
 
-    // Halaman Frontend Keprotokolan (Tetap membaca dari 1 tabel yang sama)
+    // Halaman Frontend Keprotokolan
     public function frontendKeprotokolan(Request $request)
     {
         $now = Carbon::now()->format('Y-m-d H:i:s');
 
+        // Menampilkan jenis Keprotokolan DAN Sambutan & Keprotokolan
         $query = Sambutan::where('status', 'Publik')
-                         ->whereIn('jenis_surat', ['Keprotokolan', 'Sambutan dan Keprotokolan'])
-                         // Hanya tampil jika waktu acara (Tanggal + Waktu) <= Waktu sekarang
+                         ->whereIn('jenis_surat', ['Keprotokolan', 'Sambutan & Keprotokolan'])
                          ->whereRaw("CONCAT(tanggal, ' ', waktu) <= ?", [$now]);
 
+        // FITUR PENCARIAN (Acara, Penyelenggara, Tempat, Tanggal)
         if ($request->filled('search')) {
-            $search = $request->search;
-            $query->where('acara', 'like', '%' . $search . '%');
+            $search = trim($request->search);
+            $query->where(function($q) use ($search) {
+                $q->where('acara', 'like', '%' . $search . '%')
+                  ->orWhere('penyelenggara', 'like', '%' . $search . '%')
+                  ->orWhere('tempat', 'like', '%' . $search . '%')
+                  ->orWhere('tanggal', 'like', '%' . $search . '%')
+                  ->orWhereRaw("DATE_FORMAT(tanggal, '%d-%m-%Y') LIKE ?", ['%' . $search . '%']);
+            });
         }
 
+        // Ambil jumlah entries dari request (default 10) dan gunakan paginate
+        $perPage = $request->input('per_page', 10);
         $dataKeprotokolan = $query->orderBy('tanggal', 'desc')
                                   ->orderBy('waktu', 'desc')
-                                  ->get();
+                                  ->paginate($perPage)
+                                  ->withQueryString();
 
         return view('frontend.v_keprotokolan.index', compact('dataKeprotokolan'));
+    }
+
+
+    // --- METHOD LAPORAN & CETAK SURAT ---
+
+    public function formSurat()
+    {
+        $judul = "Laporan Data Surat";
+        return view('backend.v_sambutan.form', compact('judul'));
+    }
+
+    public function cetakSurat(Request $request)
+    {
+        // Menambahkan aturan validasi
+        $request->validate([
+            'tanggal_awal' => 'required|date',
+            'tanggal_akhir' => 'required|date|after_or_equal:tanggal_awal',
+        ], [
+            'tanggal_awal.required' => 'Tanggal Awal harus diisi.',
+            'tanggal_akhir.required' => 'Tanggal Akhir harus diisi.',
+            'tanggal_akhir.after_or_equal' => 'Tanggal Akhir harus lebih besar atau sama dengan Tanggal Awal.',
+        ]);
+
+        $tanggalAwal = $request->input('tanggal_awal');
+        $tanggalAkhir = $request->input('tanggal_akhir');
+        $jenisSurat = $request->input('jenis_surat');
+
+        // Query dasar berdasarkan rentang tanggal
+        $query = Sambutan::whereBetween('tanggal', [$tanggalAwal, $tanggalAkhir]);
+
+        // Jika jenis surat dipilih, filter berdasarkan jenis surat tersebut
+        if (!empty($jenisSurat)) {
+            $query->where('jenis_surat', $jenisSurat);
+        }
+
+        $surat = $query->orderBy('tanggal', 'desc')
+                       ->orderBy('waktu', 'desc')
+                       ->get();
+
+        return view('backend.v_sambutan.cetak', [
+            'judul' => 'Laporan Data Surat' . ($jenisSurat ? ' - ' . $jenisSurat : ''),
+            'tanggalAwal' => $tanggalAwal,
+            'tanggalAkhir' => $tanggalAkhir,
+            'jenisSurat' => $jenisSurat,
+            'cetak' => $surat
+        ]);
     }
 }

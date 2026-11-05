@@ -81,11 +81,16 @@
         color: var(--text-main) !important;
     }
 
-    /* Styling Tambahan Paginasi Custom */
+    /* Styling Tambahan Paginasi Custom agar teks Previous & Next muncul */
+    .pagination-custom .pagination {
+        margin-bottom: 0;
+    }
     .pagination-custom .page-link {
         background-color: var(--bg-body);
         color: var(--text-main);
         border-color: var(--border-color);
+        padding: 0.375rem 0.75rem;
+        font-size: 0.875rem;
     }
     .pagination-custom .page-item.active .page-link {
         background-color: #0d6efd !important;
@@ -97,6 +102,12 @@
         background-color: var(--bg-body);
         border-color: var(--border-color);
         opacity: 0.6;
+    }
+    :root[data-theme="dark"] .pagination-custom .page-link:hover {
+        background-color: rgba(255, 255, 255, 0.07) !important;
+    }
+    :root[data-theme="light"] .pagination-custom .page-link:hover {
+        background-color: rgba(0, 0, 0, 0.04) !important;
     }
 </style>
 
@@ -205,7 +216,7 @@
                 </table>
             </div>
 
-            <!-- BAGIAN INFO PAGINASI & BUTTONS -->
+            <!-- BAGIAN INFO PAGINASI & BUTTONS (DIREVISI HANYA BAGIAN INI) -->
             <div class="d-flex flex-column flex-md-row justify-content-between align-items-center mt-3 pt-3 border-top" style="border-color: var(--border-color) !important;">
                 <div class="mb-2 mb-md-0 small" style="color: var(--text-main);">
                     @if(method_exists($suratSambutan, 'total'))
@@ -216,10 +227,33 @@
                 </div>
 
                 <div>
-                    @if(method_exists($suratSambutan, 'links'))
-                        <div class="pagination-custom">
-                            {{ $suratSambutan->appends(request()->query())->links('pagination::bootstrap-4') }}
-                        </div>
+                    @if(method_exists($suratSambutan, 'hasPages'))
+                        <nav class="pagination-custom">
+                            <ul class="pagination pagination-sm mb-0">
+                                {{-- Tombol Previous --}}
+                                @if ($suratSambutan->onFirstPage())
+                                    <li class="page-item disabled"><span class="page-link">Previous</span></li>
+                                @else
+                                    <li class="page-item"><a class="page-link" href="{{ $suratSambutan->previousPageUrl() }}" rel="prev">Previous</a></li>
+                                @endif
+
+                                {{-- Nomor Halaman --}}
+                                @foreach ($suratSambutan->getUrlRange(max(1, $suratSambutan->currentPage() - 2), min($suratSambutan->lastPage(), $suratSambutan->currentPage() + 2)) as $page => $url)
+                                    @if ($page == $suratSambutan->currentPage())
+                                        <li class="page-item active"><span class="page-link">{{ $page }}</span></li>
+                                    @else
+                                        <li class="page-item"><a class="page-link" href="{{ $url }}">{{ $page }}</a></li>
+                                    @endif
+                                @endforeach
+
+                                {{-- Tombol Next --}}
+                                @if ($suratSambutan->hasMorePages())
+                                    <li class="page-item"><a class="page-link" href="{{ $suratSambutan->nextPageUrl() }}" rel="next">Next</a></li>
+                                @else
+                                    <li class="page-item disabled"><span class="page-link">Next</span></li>
+                                @endif
+                            </ul>
+                        </nav>
                     @else
                         <!-- Layout Statis Jika Tidak Menggunakan Paginasi Laravel -->
                         <nav>

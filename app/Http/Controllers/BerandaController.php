@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\Sambutan;
-use App\Models\Keprotokolan; // Import model Keprotokolan
+use App\Models\Keprotokolan;
 use Illuminate\Support\Facades\DB;
 
 class BerandaController extends Controller
@@ -15,16 +15,20 @@ class BerandaController extends Controller
         // 1. Data Total User
         $totalUser = User::count();
 
-        // 2. Data Statistik Keprotokolan
-        $totalPengajuan = Keprotokolan::count();
-        $totalPendingProtokol = 0;
+        // 2. Perhitungan Otomatis Berdasarkan Tiga Jenis Surat di Tabel Sambutan
+        $totalSuratSambutan     = Sambutan::where('jenis_surat', 'Sambutan')->count();
+        $totalSuratKeprotokolan = Sambutan::where('jenis_surat', 'Keprotokolan')->count();
+        $totalGabunganSurat     = Sambutan::where('jenis_surat', 'Sambutan & Keprotokolan')->count();
+        
+        // Total keseluruhan surat untuk card utama
+        $totalSambutan          = $totalSuratSambutan + $totalSuratKeprotokolan + $totalGabunganSurat;
+
+        $totalPengajuan         = Keprotokolan::count();
+        $totalPendingProtokol   = 0;
         $totalDisetujuiProtokol = 0;
-        $totalDitolakProtokol = 0;
+        $totalDitolakProtokol   = 0;
 
-        // 3. Data Total Sambutan
-        $totalSambutan = Sambutan::count();
-
-        // 4. Data Sambutan Per Bulan (Akumulasi Grafik)
+        // 3. Data Grafik Per Bulan
         $sambutanPerBulan = Sambutan::select(
             DB::raw('MONTH(tanggal) as bulan'),
             DB::raw('COUNT(*) as total')
@@ -34,22 +38,37 @@ class BerandaController extends Controller
         ->pluck('total', 'bulan')
         ->toArray();
 
-        // Array 12 Bulan (Januari - Desember)
         $dataBulananSambutan = [];
         for ($i = 1; $i <= 12; $i++) {
             $dataBulananSambutan[] = (int) ($sambutanPerBulan[$i] ?? 0);
         }
+
+        // 4. Data Grafik Berdasarkan Penyusun (Hanya yang benar-benar ada namanya)
+        $suratPerPenyusun = Sambutan::select('penyusun as nama_penyusun', DB::raw('count(id) as total'))
+            ->whereNotNull('penyusun')
+            ->where('penyusun', '!=', '')
+            ->where('penyusun', '!=', '-')
+            ->groupBy('penyusun')
+            ->get();
+
+        $labelPenyusun = $suratPerPenyusun->pluck('nama_penyusun')->toArray();
+        $dataPenyusun  = $suratPerPenyusun->pluck('total')->toArray();
 
         return view('backend.v_beranda.index', [
             'judul'                  => 'Beranda',
             'sub'                    => 'Halaman Beranda',
             'totalUser'              => $totalUser,
             'totalPengajuan'         => $totalPengajuan,
+            'totalSuratSambutan'     => $totalSuratSambutan,
+            'totalSuratKeprotokolan' => $totalSuratKeprotokolan,
+            'totalGabunganSurat'     => $totalGabunganSurat,
             'totalPendingProtokol'   => $totalPendingProtokol,
             'totalDisetujuiProtokol' => $totalDisetujuiProtokol,
             'totalDitolakProtokol'   => $totalDitolakProtokol,
             'totalSambutan'          => $totalSambutan,
-            'dataBulananSambutan'    => $dataBulananSambutan
+            'dataBulananSambutan'    => $dataBulananSambutan,
+            'labelPenyusun'          => $labelPenyusun,
+            'dataPenyusun'           => $dataPenyusun
         ]);
     }
 

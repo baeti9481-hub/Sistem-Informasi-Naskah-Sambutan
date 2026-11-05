@@ -22,7 +22,7 @@
                             {{-- Sisi Kiri: Preview & Input Unggah Berkas/Scan Surat --}}
                             <div class="col-12 col-md-4">
                                 <div class="form-group mb-3">
-                                    <label class="fw-semibold small text-secondary mb-1">Dokumen / Scan Surat <span class="text-danger">*</span></label>
+                                    <label class="fw-semibold small text-secondary mb-1">Dokumen / Scan Surat <span class="text-muted fw-normal">(Opsional)</span></label>
                                     <div class="mb-3 mt-1 text-center">
                                         {{-- 1. Wadah Preview Gambar --}}
                                         <img class="foto-preview img-fluid img-thumbnail rounded-3 w-100" style="max-height: 250px; display: none; object-fit: cover; margin: 0 auto;">
@@ -41,8 +41,8 @@
                                         </div>
                                     </div>
 
-                                    {{-- Input File --}}
-                                    <input type="file" name="file_surat" id="file_surat" class="form-control form-control-sm form-control-md @error('file_surat') is-invalid @enderror" onchange="previewBerkas()" accept=".pdf,.doc,.docx,image/*" required>
+                                    {{-- Input File (Atribut required dihapus) --}}
+                                    <input type="file" name="file_surat" id="file_surat" class="form-control form-control-sm form-control-md @error('file_surat') is-invalid @enderror" onchange="previewBerkas()" accept=".pdf,.doc,.docx,image/*">
                                     <small class="text-muted d-block mt-1" style="font-size: 0.75rem;">Format: PDF, DOC, DOCX, JPG, PNG (Maks. 5MB)</small>
                                     
                                     @error('file_surat')
@@ -145,7 +145,7 @@
                                         <option value="" selected disabled>-- Jenis Surat --</option>
                                         <option value="Sambutan" {{ old('kategori') == 'Sambutan' ? 'selected' : '' }}>Sambutan</option>
                                         <option value="Keprotokolan" {{ old('kategori') == 'Keprotokolan' ? 'selected' : '' }}>Keprotokolan</option>
-                                        <option value="Sambutan dan Keprotokolan" {{ old('kategori') == 'Sambutan dan Keprotokolan' ? 'selected' : '' }}>Sambutan dan Keprotokolan</option>
+                                        <option value="Sambutan & Keprotokolan" {{ old('kategori') == 'Sambutan & Keprotokolan' ? 'selected' : '' }}>Sambutan & Keprotokolan</option>
                                     </select>
                                     @error('kategori')
                                         <div class="invalid-feedback d-block mt-1 alert-danger p-1 rounded small text-white">{{ $message }}</div>

@@ -155,22 +155,21 @@
                                     @enderror
                                 </div>
 
-                                {{-- JENIS SURAT (DI ATAS STATUS) --}}
-                                <div class="form-group mb-3">
-                                    <label class="fw-semibold small text-secondary mb-1">Jenis Surat <span class="text-danger">*</span></label>
-                                    <select name="jenis_surat" class="form-select @error('jenis_surat') is-invalid @enderror" required>
-                                        <option value="" disabled>-- Pilih Jenis Surat --</option>
-                                        <option value="Sambutan" {{ old('jenis_surat', $row->jenis_surat ?? '') == 'Sambutan' ? 'selected' : '' }}>Sambutan</option>
-                                        <option value="Undangan" {{ old('jenis_surat', $row->jenis_surat ?? '') == 'Undangan' ? 'selected' : '' }}>Undangan</option>
-                                        <option value="Keterangan" {{ old('jenis_surat', $row->jenis_surat ?? '') == 'Keterangan' ? 'selected' : '' }}>Keterangan</option>
-                                        <option value="Permohonan" {{ old('jenis_surat', $row->jenis_surat ?? '') == 'Permohonan' ? 'selected' : '' }}>Permohonan</option>
-                                        <option value="Lainnya" {{ old('jenis_surat', $row->jenis_surat ?? '') == 'Lainnya' ? 'selected' : '' }}>Lainnya</option>
-                                    </select>
-                                    @error('jenis_surat')
-                                        <div class="invalid-feedback d-block mt-1 alert-danger p-1 rounded small text-white">{{ $message }}</div>
-                                    @enderror
-                                </div>
-
+                              <div class="form-group mb-3">
+    <label class="fw-semibold small text-secondary mb-1">Jenis Surat <span class="text-danger">*</span></label>
+    <select name="jenis_surat" class="form-select @error('jenis_surat') is-invalid @enderror" required>
+        <option value="" disabled>-- Pilih Jenis Surat --</option>
+        <option value="Sambutan" {{ old('jenis_surat', $row->jenis_surat ?? '') == 'Sambutan' ? 'selected' : '' }}>Sambutan</option>
+        
+        {{-- Perbaikan di sini (value diubah menjadi "Keprotokolan") --}}
+        <option value="Keprotokolan" {{ old('jenis_surat', $row->jenis_surat ?? '') == 'Keprotokolan' ? 'selected' : '' }}>Keprotokolan</option>
+        
+        <option value="Sambutan & Keprotokolan" {{ old('jenis_surat', $row->jenis_surat ?? '') == 'Sambutan & Keprotokolan' ? 'selected' : '' }}>Sambutan & Keprotokolan</option>
+    </select>
+    @error('jenis_surat')
+        <div class="invalid-feedback d-block mt-1 alert-danger p-1 rounded small text-white">{{ $message }}</div>
+    @enderror
+</div>
                                 {{-- STATUS PUBLIKASI --}}
                                 <div class="form-group mb-3">
                                     <label class="fw-semibold small text-secondary mb-1">Status <span class="text-danger">*</span></label>

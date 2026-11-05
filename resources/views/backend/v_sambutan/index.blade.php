@@ -65,14 +65,15 @@
               {{-- JIKA USER ADALAH AJUDAN (ROLE 2) --}}
               @if (Auth::user()->role == '2')
                 <th>Acara</th>
-                <th>Link Sambutan</th>
-                <th>Tempat</th>
-                <th>Penyusun</th>
                 <th>Penyelenggara</th>
-                <th>Jenis Surat</th>
+                <th>Tempat</th>
                 <th>Tanggal</th>
                 <th>Waktu</th>
                 <th>Dokumen</th>
+                <th>Link Sambutan</th>
+                <th>Jenis Surat</th>
+                <th>Penyusun</th>
+                
               @else
                 {{-- UNTUK ROLE LAIN (SUPER ADMIN & ADMIN) --}}
                 <th>Acara</th>
@@ -96,22 +97,8 @@
               {{-- JIKA USER ADALAH AJUDAN (ROLE 2) --}}
               @if (Auth::user()->role == '2')
                 <td>{{ $row->acara }}</td>
-                
-                {{-- KOLOM LINK --}}
-                <td class="text-center">
-                  @if($row->link)
-                    <a href="{{ $row->link }}" target="_blank" class="btn btn-sm btn-info text-white">
-                      <i class="fas fa-external-link-alt"></i> Buka Link
-                    </a>
-                  @else
-                    <span class="text-muted">-</span>
-                  @endif
-                </td>
-
-                <td>{{ $row->tempat }}</td>
-                <td>{{ $row->penyusun ?? '-' }}</td>
                 <td>{{ $row->penyelenggara }}</td>
-                <td>{{ $row->jenis_surat ?? '-' }}</td> 
+                <td>{{ $row->tempat }}</td>
                 <td>{{ \Carbon\Carbon::parse($row->tanggal)->format('d-m-Y') }}</td>
                 <td>{{ $row->waktu }}</td>
 
@@ -125,6 +112,20 @@
                     <span class="text-muted">-</span>
                   @endif
                 </td>
+
+                {{-- KOLOM LINK SAMBUTAN --}}
+                <td class="text-center">
+                  @if($row->link)
+                    <a href="{{ $row->link }}" target="_blank" class="btn btn-sm btn-info text-white">
+                      <i class="fas fa-external-link-alt"></i> Buka Link
+                    </a>
+                  @else
+                    <span class="text-muted">-</span>
+                  @endif
+                </td>
+
+                <td>{{ $row->jenis_surat ?? '-' }}</td> 
+                <td>{{ $row->penyusun ?? '-' }}</td>
 
               @else
                 {{-- UNTUK ROLE LAIN (SUPER ADMIN & ADMIN) --}}

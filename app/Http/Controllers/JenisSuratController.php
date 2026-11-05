@@ -8,9 +8,6 @@ use Carbon\Carbon;
 
 class JenisSuratController extends Controller
 {
-    /**
-     * Halaman Frontend Sambutan
-     */
     public function sambutan(Request $request)
     {
         $judul = 'Sambutan';
@@ -20,12 +17,11 @@ class JenisSuratController extends Controller
             $perPage = 10;
         }
 
-        // Ambil waktu saat ini (Tahun-Bulan-Hari Jam:Menit:Detik)
-        $waktuSekarang = Carbon::now()->format('Y-m-d H:i:s');
+        $hariIni = Carbon::now()->format('Y-m-d');
 
-        $suratSambutan = Sambutan::where('jenis_surat', 'Sambutan')
-            ->where('status', 'Publik') // Harus berstatus Publik
-            ->whereRaw("CONCAT(tanggal, ' ', waktu) <= ?", [$waktuSekarang]) // Otomatis terbit jika Waktu Acara <= Waktu Sekarang
+        $suratSambutan = Sambutan::whereIn('jenis_surat', ['Sambutan', 'Sambutan & Keprotokolan'])
+            ->where('status', 'Publik')
+            ->where('tanggal', '<=', $hariIni)
             ->when($search, function ($query, $search) {
                 return $query->where(function ($q) use ($search) {
                     $q->where('acara', 'like', '%' . $search . '%')
@@ -42,9 +38,6 @@ class JenisSuratController extends Controller
         return view('frontend.v_sambutan.index', compact('judul', 'suratSambutan'));
     }
 
-    /**
-     * Halaman Frontend Keprotokolan
-     */
     public function keprotokolan(Request $request)
     {
         $judul = 'Keprotokolan';
@@ -54,11 +47,11 @@ class JenisSuratController extends Controller
             $perPage = 10;
         }
 
-        $waktuSekarang = Carbon::now()->format('Y-m-d H:i:s');
+        $hariIni = Carbon::now()->format('Y-m-d');
 
-        $pengajuan = Sambutan::where('jenis_surat', 'Keprotokolan')
+        $pengajuan = Sambutan::whereIn('jenis_surat', ['Keprotokolan', 'Sambutan & Keprotokolan'])
             ->where('status', 'Publik')
-            ->whereRaw("CONCAT(tanggal, ' ', waktu) <= ?", [$waktuSekarang])
+            ->where('tanggal', '<=', $hariIni)
             ->when($search, function ($query, $search) {
                 return $query->where(function ($q) use ($search) {
                     $q->where('acara', 'like', '%' . $search . '%')
@@ -75,9 +68,6 @@ class JenisSuratController extends Controller
         return view('frontend.v_keprotokolan.index', compact('judul', 'pengajuan'));
     }
 
-    /**
-     * Halaman Frontend Sambutan & Keprotokolan
-     */
     public function sambutanKeprotokolan(Request $request)
     {
         $judul = 'Sambutan & Keprotokolan';
@@ -87,11 +77,11 @@ class JenisSuratController extends Controller
             $perPage = 10;
         }
 
-        $waktuSekarang = Carbon::now()->format('Y-m-d H:i:s');
+        $hariIni = Carbon::now()->format('Y-m-d');
 
-        $agenda = Sambutan::where('jenis_surat', 'Sambutan dan Keprotokolan')
+        $agenda = Sambutan::where('jenis_surat', 'Sambutan & Keprotokolan')
             ->where('status', 'Publik')
-            ->whereRaw("CONCAT(tanggal, ' ', waktu) <= ?", [$waktuSekarang])
+            ->where('tanggal', '<=', $hariIni)
             ->when($search, function ($query, $search) {
                 return $query->where(function ($q) use ($search) {
                     $q->where('acara', 'like', '%' . $search . '%')

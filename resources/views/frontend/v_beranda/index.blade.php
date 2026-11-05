@@ -1,6 +1,6 @@
 @extends('frontend.v_layouts.app')
 
-@section('title', 'Beranda - Si-Sambut')
+@section('title', 'Beranda - SINAS')
 
 @section('content')
 

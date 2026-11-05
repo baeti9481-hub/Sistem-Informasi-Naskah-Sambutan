@@ -33,12 +33,6 @@ Route::get('/surat-sambutan', [JenisSuratController::class, 'sambutan'])->name('
 Route::get('/surat/keprotokolan', [JenisSuratController::class, 'keprotokolan'])->name('frontend.keprotokolan');
 Route::get('/surat/sambutan-keprotokolan', [JenisSuratController::class, 'sambutanKeprotokolan'])->name('frontend.sambutan_keprotokolan');
 
-// Pengajuan Keprotokolan Frontend
-Route::get('/pengajuan-keprotokolan', [PengajuanKeprotokolanController::class, 'indexFrontend'])->name('frontend.v_keprotokolan.index');
-Route::get('/pengajuan-keprotokolan/tambah', [PengajuanKeprotokolanController::class, 'create'])->name('frontend.v_keprotokolan.create');
-Route::post('/pengajuan-keprotokolan/simpan', [PengajuanKeprotokolanController::class, 'store'])->name('frontend.v_keprotokolan.store');
-Route::get('/reload-captcha', [PengajuanKeprotokolanController::class, 'reloadCaptcha'])->name('reload.captcha');
-
 
 // ==========================================
 // --- ROUTE LOGIN ---
@@ -46,9 +40,11 @@ Route::get('/reload-captcha', [PengajuanKeprotokolanController::class, 'reloadCa
 
 Route::get('/backend/login', [LoginController::class, 'index'])->name('login');
 Route::post('/backend/login', [LoginController::class, 'authenticate'])->name('login.proses');
+
 // Route Halaman Lupa Password
 Route::get('/backend/lupa-password', [LoginController::class, 'lupaPassword'])->name('lupa_password');
 Route::post('/backend/lupa-password', [LoginController::class, 'prosesLupaPassword'])->name('lupa_password.proses');
+
 
 // ==========================================
 // --- ROUTE BACKEND (HARUS LOGIN) ---
@@ -66,13 +62,17 @@ Route::middleware('auth')->group(function () {
     // Route User (Resource)
     Route::resource('backend/user', UserController::class, ['as' => 'backend']);
 
-    // Route Group Backend Sidebar
+    // Route Group Backend Sidebar & Fitur Utama
     Route::prefix('backend')->name('backend.')->group(function () {
 
-        // 1. Sub-menu Sambutan
+        // 1. Sub-menu Laporan Surat Sambutan (Form & Cetak)
+        Route::get('/backend/laporan/form', [SambutanController::class, 'formSurat'])->name('sambutan.form');
+        Route::post('/sambutan/laporan/cetak', [SambutanController::class, 'cetakSurat'])->name('sambutan.cetak');
+
+        // 2. Sub-menu Sambutan (Resource)
         Route::resource('sambutan', SambutanController::class);
 
-        // 2. Sub-menu Keprotokolan (Backend CRUD)
+        // 3. Sub-menu Keprotokolan (Backend CRUD)
         Route::get('/keprotokolan', [PengajuanKeprotokolanController::class, 'index'])->name('keprotokolan.index');
         Route::get('/keprotokolan/create', [PengajuanKeprotokolanController::class, 'createBackend'])->name('keprotokolan.create');
         Route::post('/keprotokolan', [PengajuanKeprotokolanController::class, 'storeBackend'])->name('keprotokolan.store');
@@ -82,9 +82,9 @@ Route::middleware('auth')->group(function () {
         Route::delete('/keprotokolan/{id}', [PengajuanKeprotokolanController::class, 'destroy'])->name('keprotokolan.destroy');
         Route::put('/keprotokolan/{id}/verifikasi', [PengajuanKeprotokolanController::class, 'verifikasi'])->name('keprotokolan.verifikasi');
 
+        // Route Frontend Keprotokolan (di dalam backend prefix)
+        Route::get('/surat/keprotokolan', [SambutanController::class, 'frontendKeprotokolan'])->name('frontend.keprotokolan.index');
 
-        // Route Frontend Keprotokolan
- Route::get('/surat/keprotokolan', [SambutanController::class, 'frontendKeprotokolan'])->name('frontend.keprotokolan.index');
     });
 
 });

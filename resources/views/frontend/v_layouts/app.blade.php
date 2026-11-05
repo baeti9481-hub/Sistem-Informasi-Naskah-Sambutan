@@ -328,7 +328,7 @@
                     <h5 class="fw-bold mb-0 text-white">SINAS</h5>
                 </div>
                 <p class="text-white-50 small mb-3">
-                    Sistem Informasi Layanan Surat Sambutan dan Keprotokolan Resmi Publik Sekretariat Daerah. Menjawab kebutuhan transparansi dan efisiensi layanan instansi.
+                    Sistem Informasi Naskah Sambutan dan Keprotokolan. Menjawab kebutuhan transparansi dan efisiensi layanan instansi.
                 </p>
                 <div class="d-flex gap-2">
                     <a href="#" class="btn btn-sm btn-outline-light rounded-circle px-2 py-1" title="Website"><i class="bi bi-globe"></i></a>
@@ -346,7 +346,7 @@
                     </li>
                     <li class="d-flex align-items-center gap-2">
                         <i class="bi bi-envelope-fill text-primary"></i>
-                        <a href="mailto:protokol@sisambut.go.id" class="text-white-50 text-decoration-none">protokol@SINAS.go.id</a>
+                        <a href="mailto:protokol@sinas.go.id" class="text-white-50 text-decoration-none">prokompim.go.id</a>
                     </li>
                 </ul>
             </div>
@@ -377,7 +377,7 @@
         <!-- COPYRIGHT & SUB FOOTER -->
         <div class="row pt-3 align-items-center small text-white-50">
             <div class="col-md-6 text-center text-md-start mb-2 mb-md-0">
-                &copy; {{ date('Y') }} <strong class="text-white">SINAS</strong>. BP.
+                &copy; {{ date('Y') }} <strong class="text-white">Sekretariat Kabupaten Tegal</strong>
             </div>
             <div class="col-md-6 text-center text-md-end">
                 <a href="#" class="text-white-50 text-decoration-none me-3 hover-white">Syarat & Ketentuan</a>
